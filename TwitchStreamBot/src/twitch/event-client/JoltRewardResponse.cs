@@ -1,5 +1,6 @@
 using Nixill.Streaming.JoltBot.Data;
 using Nixill.Streaming.JoltBot.Twitch.Api;
+using TwitchLib.Api.Helix.Models.ChannelPoints.UpdateCustomReward;
 using TwitchLib.Api.Helix.Models.ChannelPoints.UpdateCustomRewardRedemptionStatus;
 
 namespace Nixill.Streaming.JoltBot.Twitch.Events.Rewards;
@@ -35,6 +36,22 @@ public static class JoltRewardResponse
         rewardUUID, [redemptionUUID], new UpdateCustomRewardRedemptionStatusRequest
         {
           Status = TwitchLib.Api.Core.Enums.CustomRewardRedemptionStatus.CANCELED
+        }
+      ));
+
+  public static Task PauseRewardByName(string rewardName)
+    => JoltApiClient.WithToken((api, id) => api.Helix.ChannelPoints.UpdateCustomRewardAsync(id,
+        RewardsJson.RewardKeys[rewardName], new UpdateCustomRewardRequest
+        {
+          IsPaused = true
+        }
+      ));
+
+  public static Task UnpauseRewardByName(string rewardName)
+    => JoltApiClient.WithToken((api, id) => api.Helix.ChannelPoints.UpdateCustomRewardAsync(id,
+        RewardsJson.RewardKeys[rewardName], new UpdateCustomRewardRequest
+        {
+          IsPaused = false
         }
       ));
 }

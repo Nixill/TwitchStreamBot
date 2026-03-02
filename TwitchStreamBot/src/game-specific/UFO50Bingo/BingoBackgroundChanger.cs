@@ -15,10 +15,17 @@ public static partial class BingoBackgroundChanger
   [GeneratedRegex(@"(blood|blue ?sky|ceramic|cherry|gold|golf|indigo|infinity|lemon|tangerine)", RegexOptions.IgnoreCase)]
   private static partial Regex BackgroundNames { get; }
 
+  public static async Task<string> GetActiveBackground()
+  {
+    var result = await OBSRequests.Inputs.GetInputSettings("img_UFOBackground").Send();
+    string bg = (string)result.Settings!["file"] ?? "";
+    return Path.GetFileNameWithoutExtension(bg);
+  }
+
   [ChannelPointsReward("UFO50.ChangeBackground")]
   [AllowedWithGame("UFO 50")]
   [AllowedWithTag("Bingo")]
-  public static async Task ChangeBackgroundReward(RewardContext ctx)
+  public static async Task SetBackgroundReward(RewardContext ctx)
   {
     MatchCollection mtcs = BackgroundNames.Matches(ctx.Message);
     string[] values = [.. mtcs.Select(m => m.Value).Distinct(StringComparer.InvariantCultureIgnoreCase)];
@@ -41,8 +48,14 @@ public static partial class BingoBackgroundChanger
 
     if (bgName.Equals("bluesky", StringComparison.InvariantCultureIgnoreCase)) bgName = "blue sky";
 
-    UFO50Background bg = UFO50BackgroundsCsv.GetBackground(ctx.Message);
+    UFO50Background bg = UFO50BackgroundsCsv.GetBackground(bgName);
+    await SetSelectedBackground(bg);
+    await JoltRewardResponse.CompleteRewardByName("UFO50.ChangeBackground", ctx.RedemptionArgs.Id);
+    await Cooldown();
+  }
 
+  private static async Task SetSelectedBackground(UFO50Background bg)
+  {
     await new OBSRequestBatch(
       OBSExtraRequests.Inputs.Image.SetInputImage("img_UFOBackground",
         @$"C:\Users\Nixill\Documents\Streaming-2024\Images\UFO50\Library_Backgrounds\{bg.Name}.png"),
@@ -57,6 +70,25 @@ public static partial class BingoBackgroundChanger
         "cc_Bingo Background Coloration", ColorConversions.FromRGB(bg.UIColor))
     ).Send();
 
-    await JoltRewardResponse.CompleteRewardByName("UFO50.ChangeBackground", ctx.RedemptionArgs.Id);
+  }
+
+  [ChannelPointsReward("UFO50.RandomBackground")]
+  [AllowedWithGame("UFO 50")]
+  [AllowedWithTag("Bingo")]
+  public static async Task RandomBackgroundReward(RewardContext ctx)
+  {
+    string active = await GetActiveBackground();
+    UFO50Background bg = UFO50BackgroundsCsv.GetRandomBackground(except: active);
+    await SetSelectedBackground(bg);
+    await Cooldown();
+  }
+
+  public static async Task Cooldown()
+  {
+    await JoltRewardResponse.PauseRewardByName("UFO50.ChangeBackground");
+    await JoltRewardResponse.PauseRewardByName("UFO50.RandomBackground");
+    await Task.Delay(TimeSpan.FromMinutes(1));
+    await JoltRewardResponse.UnpauseRewardByName("UFO50.ChangeBackground");
+    await JoltRewardResponse.UnpauseRewardByName("UFO50.RandomBackground");
   }
 }

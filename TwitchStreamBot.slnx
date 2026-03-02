@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/CSharp.Nixill/">
+    <Project Path="CSharp.Nixill/CSharp.Nixill/CSharp.Nixill.csproj" />
+  </Folder>
+  <Folder Name="/TwitchLib.EventSub.Websockets/">
+    <Project Path="TwitchLib.EventSub.Websockets/TwitchLib.EventSub.Websockets/TwitchLib.EventSub.Websockets.csproj" />
+  </Folder>
+  <Project Path="CSharp.Nixill.OBSWS/CSharp.Nixill.OBSWS.csproj" />
+  <Project Path="TwitchStreamBot/TwitchStreamBot.csproj" />
+</Solution>

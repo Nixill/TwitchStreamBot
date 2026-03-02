@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using Nixill.OBSWS;
 using Nixill.Streaming.JoltBot.OBS;
+using Nixill.Streaming.JoltBot.Twitch.Events.Rewards;
 using Nixill.Utils;
 using Nixill.Utils.Extensions;
 
@@ -182,6 +183,10 @@ public static partial class BingoSetup
       if (!responses[nameof(generalsOverDraft)].FinishedWithoutErrors) Logger.LogError("Error setting generals over draft");
     }
 
+    await JoltRewardResponse.UnpauseRewardByName("UFO50.RandomBackground");
+    await JoltRewardResponse.UnpauseRewardByName("UFO50.ChangeBackground");
+
+    await BingoMusicController.ResetMusic();
     await BingoMusicController.PlayIntroMusic();
   }
 
